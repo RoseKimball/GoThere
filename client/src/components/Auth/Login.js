@@ -18,12 +18,14 @@ const Login = ({ classes }) => {
           authorization: idToken
         }
       });
+      // console.log(client);
       const { me } = await client.request(ME_QUERY);
-      // console.log(me);
+      console.log('me request', me);
       dispatch({ type: "LOGIN_USER", payload: me });
       dispatch({ type: "IS_LOGGED_IN", payload: googleUser.isSignedIn() });
     } catch (err) {
       onFailure(err);
+      dispatch({ type: "IS_LOGGED_IN", payload: false });
     }
   };
 

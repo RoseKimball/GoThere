@@ -11,6 +11,7 @@ import SaveIcon from "@material-ui/icons/SaveTwoTone";
 import context from "../../context";
 import { CREATE_PIN_MUTATION } from "../../graphql/mutations";
 import { useClient } from "../../client";
+import { unstable_useMediaQuery as useMediaQuery } from "@material-ui/core/useMediaQuery";
 
 const CreatePin = ({ classes }) => {
   const client = useClient();
@@ -22,6 +23,8 @@ const CreatePin = ({ classes }) => {
 
   const { state, dispatch } = useContext(context);
 
+  const mobileSize = useMediaQuery("(max-width: 650px)");
+
   const handleSubmit = async e => {
     try {
       e.preventDefault();
@@ -30,14 +33,11 @@ const CreatePin = ({ classes }) => {
       const url = await handleImageUpload();
       const { latitude, longitude } = state.draft;
       const variables = { title, image: url, content, latitude, longitude };
-      const { createPin } = await client.request(
-        CREATE_PIN_MUTATION,
-        variables
-      );
+      await client.request(CREATE_PIN_MUTATION, variables);
       clearDraft();
-      dispatch({ type: "CREATE_PIN", payload: createPin });
+      // dispatch({ type: "CREATE_PIN", payload: createPin });
       setSubmitting(false);
-      console.log("pin", { createPin });
+      // console.log("pin", { createPin });
     } catch (err) {
       setSubmitting(false);
       console.log("error creating pin", err);
@@ -121,8 +121,8 @@ const CreatePin = ({ classes }) => {
         className={classes.contentField}
         name="content"
         label="Content"
-        multiline="true"
-        rows="6"
+        multiline={true}
+        rows={mobileSize ? "3" : "6"}
         margin="normal"
         fullwidth="true"
         variant="outlined"
