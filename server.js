@@ -28,5 +28,5 @@ const server = new ApolloServer({
     }
 })
 
-server.listen();
+server.listen({ port: process.env.PORT || 4000});
 
