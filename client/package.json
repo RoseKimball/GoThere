@@ -15,6 +15,7 @@
     "graphql-request": "^1.8.2",
     "graphql-tag": "^2.10.1",
     "mapbox-gl": "^0.52.0",
+    "prop-types": "^15.7.2",
     "react": "^16.8.0-alpha.1",
     "react-apollo": "^2.4.0",
     "react-dom": "^16.8.0-alpha.1",
@@ -25,6 +26,7 @@
     "subscriptions-transport-ws": "^0.9.18"
   },
   "scripts": {
+    "now-build": "react-scripts build",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
