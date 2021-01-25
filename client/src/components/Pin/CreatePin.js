@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import axios from "axios";
 import { withStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
@@ -24,6 +24,10 @@ const CreatePin = ({ classes }) => {
   const { state, dispatch } = useContext(context);
 
   const mobileSize = useMediaQuery("(max-width: 650px)");
+
+  useEffect(() => {
+    console.log("create pin mounted");
+  }, []);
 
   const handleSubmit = async e => {
     try {

@@ -1,5 +1,10 @@
-const { AuthenticationError } = require('apollo-server');
+const { AuthenticationError, PubSub } = require('apollo-server');
 const Pin = require('./models/Pin');
+
+const pubSub = new PubSub();
+const PIN_ADDED = "PIN_ADDED";
+const PIN_DELETED = "PIN_DELETED";
+const PIN_UPDATED = "PIN_UPDATED";
 
 const authenticated = next => (root, args, ctx, info) => {
     if(!ctx.currentUser) {
@@ -7,6 +12,7 @@ const authenticated = next => (root, args, ctx, info) => {
     }
     return next(root, args, ctx, info);
 }
+
 
 module.exports = {
     Query : {
@@ -19,11 +25,46 @@ module.exports = {
 
     Mutation: {
         createPin: authenticated(async (root, args, ctx) => {
-            const newPin = await new Pin({
+            const pinAdded = await new Pin({
                 ...args.input,
                 author: ctx.currentUser._id
             }).populate('author').save()
-            return newPin;
+            pubSub.publish(PIN_ADDED, { pinAdded })
+            return pinAdded;
+        }),
+        deletePin: authenticated(async (root, args, ctx) => {
+            const pinDeleted = await Pin.findOneAndDelete({_id: args.pinId}).exec();
+            pubSub.publish(PIN_DELETED, { pinDeleted })
+            return pinDeleted;
+        }),
+        createComment: authenticated(async (root, args, ctx) => {
+            try {
+                console.log('line 33 resolvers')
+                const newComment = {text: args.text, author: ctx.currentUser._id}
+                console.log(newComment);
+                const pinUpdated = await Pin.findOneAndUpdate(
+                    {_id: args.pinId},
+                    {$push: {comments: newComment}},
+                    {new: true}
+                ).populate('author').populate('comments.author')
+                pubSub.publish(PIN_UPDATED, { pinUpdated })
+                return pinUpdated;
+                console.log('backend res sent create comment', pinUpdated)
+            } catch(err) {
+                console.log('error creating comment', err)
+            }
         })
+    },
+
+    Subscription: {
+        pinAdded: {
+            subscribe: () => pubsub.asyncIterator(PIN_ADDED)
+        },
+        pinDeleted: {
+            subscribe: () => pubsub.asyncIterator(PIN_DELETED)
+        },
+        pinUpdated: {
+            subscribe: () => pubsub.asyncIterator(PIN_UPDATED)
+        }
     }
 }
